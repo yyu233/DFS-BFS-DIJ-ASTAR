@@ -41,25 +41,32 @@ def depthFirstSearch(xI,xG,n,m,O):
   
     """
   "*** YOUR CODE HERE ***"
-  def dfs(xI, xG, n, m, O, action_list):
+  def dfs(xI, xG, n, m, O, visited_set, tmp_action_list):
+    print (xI)
+    print (xG)
+    res = []
     if xI == xG:
-      return 1
+      return [a for a in tmp_action_list]
     u = [(-1, 0), (0, 1), (1, 0), (0, -1)]
     for i in range(len(u)):
       if not collisionCheck(xI,u[i],O):
-        next_x  = tuple(map(lambda i, j: i + j, xI, u[i]))
+        next_x  = tuple(map(lambda a, b: a + b, xI, u[i]))
         if next_x[0] >= 0 and next_x[0] < n:
           if next_x[1] >= 0 and next_x[1] < m:
-            action_list.append(u[i])
-            return dfs(next_x, xG, n, m, O, action_list) + 1
-    return 0
+            if next_x not in visited_set:
+              tmp_action_list.append(u[i])
+              visited_set.add(xI)
+              res = dfs(next_x, xG, n, m, O, visited_set, tmp_action_list)
+              tmp_action_list.pop()
+    return res
     
-  actions = []
-  visited_count = dfs(xI, xG, n, m, O, actions)
-  path = getPathFromActions(xI, actions)
-  cost = getCostOfActions(xI, actions)
+  tmp_actions = []
+  visited = set()
+  res_actions = dfs(xI, xG, n, m, O, visited, tmp_actions)
+  path = getPathFromActions(xI, res_actions)
+  cost = getCostOfActions(xI, res_actions, O)
 
-  return actions, cost, visited_count
+  return actions, cost, len(visited)
 
 
 
@@ -126,7 +133,13 @@ def showPath(xI,xG,path,n,m,O):
     fig, ax = plt.subplots(1, 1) # make a figure + axes
     ax.imshow(gridpath) # Plot it
     ax.invert_yaxis() # Needed so that bottom left is (0,0)
-     
+
+def test_dfs(xI, xG, path, n, m, O):
+    actions, cost, visited_count = depthFirstSearch(xI, xG, n, m, O)
+    print("test done")
+    path = getPathFromActions(xI,actions)
+    showPath(xI,xG,path,n,m,O)
+
 if __name__ == '__main__':
     # Run test using smallMaze.py (loads n,m,O)
     from smallMaze import *
@@ -155,4 +168,7 @@ if __name__ == '__main__':
     print('Basic cost was %d, stay west cost was %d, stay east cost was %d' %
           (simplecost,westcost,eastcost))
     
+    #plt.show()
+
+    test_dfs(xI, xG, path, n, m, O)
     plt.show()
