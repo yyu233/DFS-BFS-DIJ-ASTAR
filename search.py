@@ -88,9 +88,9 @@ def breadthFirstSearch(xI,xG,n,m,O):
     """
   "*** YOUR CODE HERE ***"
   class Node:
-    def __init__(self, x=None, prev_to_next_action=None, prev=None):
-      self.x = x
-      self.prev_to_next_action = prev_to_next_action
+    def __init__(self, cur_x=None, prev_to_cur_action=None, prev=None):
+      self.x = cur_x
+      self.prev_to_cur_action = prev_to_cur_action
       self.prev = prev
 
   def bfs(xI, xG, n, m, O):
@@ -100,29 +100,37 @@ def breadthFirstSearch(xI,xG,n,m,O):
     visited_set = set()
     q = deque()
     q.append(Node(xI))
+    visited_set.add(xI)
     #tmp_actions.append([xI])
 
     while len(q) != 0:
-      prev_node = q.popleft()
+      print("bfs")
+      cur_node = q.popleft()
+      cur_x = cur_node.x
+      print(cur_x)
       u = [(-1, 0), (0, 1), (1, 0), (0, -1)]
       for i in range(len(u)):
-        if not collisionCheck(xI,u[i],O):
-          next_x  = tuple(map(lambda a, b: a + b, xI, u[i]))
+        if not collisionCheck(cur_x,u[i],O):
+          next_x  = tuple(map(lambda a, b: a + b, cur_x, u[i]))
           if next_x[0] >= 0 and next_x[0] < n:
             if next_x[1] >= 0 and next_x[1] < m:
               if next_x not in visited_set:
-                next_node = Node(next_x, u[i],prev_node)
-                visited_set.add(next_node)
+                visited_set.add(next_x)
+                next_node = Node(next_x, u[i],cur_node)
                 if next_x == xG:
                   dst_node = next_node
                   break
                 else:
+                  print(next_x)
                   q.append(next_node)
 
     if dst_node is not None:
       itr = dst_node
-      while itr is not None:
-        res_actions.append(itr.prev_to_next_action)
+      while itr.prev is not None:
+        print("back tracing")
+        print(itr.prev_to_cur_action)
+        res_actions.append(itr.prev_to_cur_action)
+        itr = itr.prev
       res_actions.reverse()
     else:
       raise Exception("Error: bfs didn't find a solution")
@@ -187,6 +195,12 @@ def test_dfs(xI, xG, path, n, m, O):
     path = getPathFromActions(xI,actions)
     showPath(xI,xG,path,n,m,O)
 
+def test_bfs(xI, xG, path, n, m, O):
+    actions, cost, visited_count = breadthFirstSearch(xI, xG, n, m, O)
+    print("bfs test done")
+    path = getPathFromActions(xI,actions)
+    showPath(xI,xG,path,n,m,O)
+
 if __name__ == '__main__':
     # Run test using smallMaze.py (loads n,m,O)
     from smallMaze import *
@@ -218,4 +232,5 @@ if __name__ == '__main__':
     #plt.show()
 
     test_dfs(xI, xG, path, n, m, O)
+    test_bfs(xI, xG, path, n, m, O)
     plt.show()
