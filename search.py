@@ -23,8 +23,7 @@ from mazemods import getCostOfActions
 from mazemods import stayWestCost
 from mazemods import stayEastCost
 
-
-
+from collections import deque
 
 
 def depthFirstSearch(xI,xG,n,m,O):
@@ -42,8 +41,8 @@ def depthFirstSearch(xI,xG,n,m,O):
     """
   "*** YOUR CODE HERE ***"
   def dfs(xI, xG, n, m, O, visited_set, tmp_action_list):
-    print (xI)
-    print (xG)
+    #print (xI)
+    #print (xG)
     res = []
     if xI == xG:
       return [a for a in tmp_action_list]
@@ -63,10 +62,10 @@ def depthFirstSearch(xI,xG,n,m,O):
   tmp_actions = []
   visited = set()
   res_actions = dfs(xI, xG, n, m, O, visited, tmp_actions)
-  path = getPathFromActions(xI, res_actions)
+  #path = getPathFromActions(xI, res_actions)
   cost = getCostOfActions(xI, res_actions, O)
 
-  return actions, cost, len(visited)
+  return res_actions, cost, len(visited)
 
 
 
@@ -74,20 +73,76 @@ def depthFirstSearch(xI,xG,n,m,O):
 
 
 
-# def breadthFirstSearch(xI,xG,n,m,O):
-"""
-  Search the shallowest nodes in the search tree first [p 85].
- 
-  Your search algorithm needs to return a list of actions
-  and a path that reaches the goal. Make sure to implement a graph 
-  search algorithm.
-  Your algorithm also needs to return the cost of the path. 
-  Use the getCostOfActions function to do this.
-  Finally, the algorithm should return the number of visited
-  nodes in your search.
-
+def breadthFirstSearch(xI,xG,n,m,O):
   """
-"*** YOUR CODE HERE ***"
+    Search the shallowest nodes in the search tree first [p 85].
+  
+    Your search algorithm needs to return a list of actions
+    and a path that reaches the goal. Make sure to implement a graph 
+    search algorithm.
+    Your algorithm also needs to return the cost of the path. 
+    Use the getCostOfActions function to do this.
+    Finally, the algorithm should return the number of visited
+    nodes in your search.
+
+    """
+  "*** YOUR CODE HERE ***"
+  class Node:
+    def __init__(self, cur_x=None, prev_to_cur_action=None, prev=None):
+      self.x = cur_x
+      self.prev_to_cur_action = prev_to_cur_action
+      self.prev = prev
+
+  def bfs(xI, xG, n, m, O):
+    #tmp_actions = []
+    dst_node = None
+    res_actions = []
+    visited_set = set()
+    q = deque()
+    q.append(Node(xI))
+    visited_set.add(xI)
+    #tmp_actions.append([xI])
+
+    while len(q) != 0:
+      print("bfs")
+      cur_node = q.popleft()
+      cur_x = cur_node.x
+      print(cur_x)
+      u = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+      for i in range(len(u)):
+        if not collisionCheck(cur_x,u[i],O):
+          next_x  = tuple(map(lambda a, b: a + b, cur_x, u[i]))
+          if next_x[0] >= 0 and next_x[0] < n:
+            if next_x[1] >= 0 and next_x[1] < m:
+              if next_x not in visited_set:
+                visited_set.add(next_x)
+                next_node = Node(next_x, u[i],cur_node)
+                if next_x == xG:
+                  dst_node = next_node
+                  break
+                else:
+                  print(next_x)
+                  q.append(next_node)
+
+    if dst_node is not None:
+      itr = dst_node
+      while itr.prev is not None:
+        print("back tracing")
+        print(itr.prev_to_cur_action)
+        res_actions.append(itr.prev_to_cur_action)
+        itr = itr.prev
+      res_actions.reverse()
+    else:
+      raise Exception("Error: bfs didn't find a solution")
+    
+    return res_actions, visited_set
+
+  res_actions, visited = bfs(xI, xG, n, m, O)
+  cost = getCostOfActions(xI, res_actions, O)
+
+  return res_actions, cost, len(visited)
+
+
 
 
 
@@ -136,7 +191,13 @@ def showPath(xI,xG,path,n,m,O):
 
 def test_dfs(xI, xG, path, n, m, O):
     actions, cost, visited_count = depthFirstSearch(xI, xG, n, m, O)
-    print("test done")
+    print("dfs test done")
+    path = getPathFromActions(xI,actions)
+    showPath(xI,xG,path,n,m,O)
+
+def test_bfs(xI, xG, path, n, m, O):
+    actions, cost, visited_count = breadthFirstSearch(xI, xG, n, m, O)
+    print("bfs test done")
     path = getPathFromActions(xI,actions)
     showPath(xI,xG,path,n,m,O)
 
@@ -171,4 +232,5 @@ if __name__ == '__main__':
     #plt.show()
 
     test_dfs(xI, xG, path, n, m, O)
+    test_bfs(xI, xG, path, n, m, O)
     plt.show()
