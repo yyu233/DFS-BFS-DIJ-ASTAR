@@ -24,7 +24,7 @@ from mazemods import stayWestCost
 from mazemods import stayEastCost
 
 from collections import deque
-
+from queue import PriorityQueue
 
 def depthFirstSearch(xI,xG,n,m,O):
   """
@@ -148,19 +148,72 @@ def breadthFirstSearch(xI,xG,n,m,O):
 
 
 
-# def DijkstraSearch(xI,xG,n,m,O,cost=westCost):
-"""
-  Search the nodes with least cost first. 
-  
-  Your search algorithm needs to return a list of actions
-  and a path that reaches the goal. Make sure to implement a graph 
-  search algorithm.
-  Your algorithm also needs to return the total cost of the path using
-  either the stayWestCost or stayEastCost function.
-  Finally, the algorithm should return the number of visited
-  nodes in your search.
+def DijkstraSearch(xI,xG,n,m,O,cost=stayWestCost):
   """
-"*** YOUR CODE HERE ***"
+    Search the nodes with least cost first. 
+    
+    Your search algorithm needs to return a list of actions
+    and a path that reaches the goal. Make sure to implement a graph 
+    search algorithm.
+    Your algorithm also needs to return the total cost of the path using
+    either the stayWestCost or stayEastCost function.
+    Finally, the algorithm should return the number of visited
+    nodes in your search. 
+    """
+  "*** YOUR CODE HERE ***"
+  def djk(xI, xG, n, m, O, cost=cost):
+    dist = dict()
+    prev = dict()
+    dist[xI] = 0
+    prev[xI] = None
+    
+    visited = set()
+    visited.add(xI)
+
+    q = PriorityQueue()
+    q.put((0, xI))
+    count = 0
+
+    while not q.empty():
+      cur_x = q.get()
+      count = count + 1
+      visited.remove(cur_x)
+      u = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+      for i in range(len(u)):
+          if not collisionCheck(cur_x,u[i],O):
+            next_x  = tuple(map(lambda a, b: a + b, cur_x, u[i]))
+            if next_x[0] >= 0 and next_x[0] < n:
+              if next_x[1] >= 0 and next_x[1] < m:
+                cur_dist = dist[cur_x] + cost(cur_x, u[i], O)
+                if cur_dist < dist[next_x]:
+                  dist[next_x] = cur_dist
+                  prev[next_x] = cur_x
+                  if next_x not in visited:
+                    visited.add(next_x)
+                    q.put((cur_dist, next_x))
+    return dist, prev, count
+
+  res_actions = []
+  dist, prev, num_visited = djk(xI, xG, n, m, O, cost)
+
+  if prev is not None:
+    itr = xG
+    while itr != xI:
+      action = tuple(map(lambda cur_x, prev_x: cur_x - prev_x, itr, prev[itr]))
+      res_actions.append(action)
+    res_actions.reverse()
+  else:
+    raise Exception("Error: djk returns None for prev")
+
+  return res_actions, dist[xG], num_visited
+  
+
+  
+
+
+
+
+
 
 def nullHeuristic(state,goal):
    """
