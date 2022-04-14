@@ -24,7 +24,7 @@ from mazemods import stayWestCost
 from mazemods import stayEastCost
 
 from collections import deque
-from queue import PriorityQueue
+#from queue import PriorityQueue
 
 def depthFirstSearch(xI,xG,n,m,O):
   """
@@ -161,46 +161,82 @@ def DijkstraSearch(xI,xG,n,m,O,cost=stayWestCost):
     nodes in your search. 
     """
   "*** YOUR CODE HERE ***"
-  def djk(xI, xG, n, m, O, cost=cost):
+  def djk(xI, xG, n, m, O, cost=stayWestCost):
+
+    if cost.__name__ != "stayWestCost" and  cost.__name__ != "stayEastCost":
+      raise Exception(f"Error: cost function {cost.__name__} is not defined")
+
     dist = dict()
     prev = dict()
     dist[xI] = 0
     prev[xI] = None
-    
-    visited = set()
-    visited.add(xI)
 
-    q = PriorityQueue()
-    q.put((0, xI))
+    #q = PriorityQueue()
+    q = []
+    q.append((0, xI))
+    
+    visited_set = set()
+    visited_set.add(xI)
+
+    q_set = set()
+    q_set.add(xI)
     count = 0
 
-    while not q.empty():
-      cur_x = q.get()
+    while len(q) != 0:
+      print("q")
       count = count + 1
-      visited.remove(cur_x)
+      cur_tup = q.pop()
+      cur_x = cur_tup[1]
+      q_set.remove(cur_x)
+      print(cur_tup)
       u = [(-1, 0), (0, 1), (1, 0), (0, -1)]
       for i in range(len(u)):
+        print("direction loop")
+        next_x  = tuple(map(lambda a, b: a + b, cur_x, u[i]))
+        if next_x != prev[cur_x]:
           if not collisionCheck(cur_x,u[i],O):
-            next_x  = tuple(map(lambda a, b: a + b, cur_x, u[i]))
             if next_x[0] >= 0 and next_x[0] < n:
               if next_x[1] >= 0 and next_x[1] < m:
-                cur_dist = dist[cur_x] + cost(cur_x, u[i], O)
-                if cur_dist < dist[next_x]:
-                  dist[next_x] = cur_dist
-                  prev[next_x] = cur_x
-                  if next_x not in visited:
-                    visited.add(next_x)
-                    q.put((cur_dist, next_x))
+                print (f"prev {prev[cur_x]}")
+                cur_cost = cost(cur_x, [u[i]], O)
+                if cur_cost is not None:
+                  cur_dist = dist[cur_x] + cur_cost
+                else:
+                  raise Exception(f"Error: {cost.__name__} returns None")
+                if next_x in dist:
+                  if cur_dist < dist[next_x]:
+                    dist[next_x] = cur_dist
+                    prev[next_x] = cur_x
+                else:
+                    dist[next_x] = cur_dist
+                    prev[next_x] = cur_x
+                print(f"next: {next_x}")
+                if next_x in q_set:
+                  for i in range(len(q)):
+                    if q[i][1] == next_x:
+                      q[i] = (cur_dist, next_x)
+                      break
+                else:
+                  if next_x not in visited_set:
+                    visited_set.add(next_x)
+                    q_set.add(next_x)
+                    q.append((cur_dist, next_x))
+                q.sort(key=lambda x:x[0], reverse=True)
+                print(q)
+      print(f"direction loop done")
     return dist, prev, count
 
   res_actions = []
   dist, prev, num_visited = djk(xI, xG, n, m, O, cost)
+  print("djk done")
 
   if prev is not None:
     itr = xG
     while itr != xI:
+      print(itr)
       action = tuple(map(lambda cur_x, prev_x: cur_x - prev_x, itr, prev[itr]))
       res_actions.append(action)
+      itr = prev[itr]
     res_actions.reverse()
   else:
     raise Exception("Error: djk returns None for prev")
@@ -254,6 +290,12 @@ def test_bfs(xI, xG, path, n, m, O):
     path = getPathFromActions(xI,actions)
     showPath(xI,xG,path,n,m,O)
 
+def test_djk_stay_west_cost(xI, xG, path, n, m, O):
+    actions, cost, visited_count = DijkstraSearch(xI, xG, n, m, O)
+    print("djk test done")
+    path = getPathFromActions(xI, actions)
+    showPath(xI,xG,path,n,m,O)
+
 if __name__ == '__main__':
     # Run test using smallMaze.py (loads n,m,O)
     from smallMaze import *
@@ -284,6 +326,8 @@ if __name__ == '__main__':
     
     #plt.show()
 
-    test_dfs(xI, xG, path, n, m, O)
-    test_bfs(xI, xG, path, n, m, O)
+    #test_dfs(xI, xG, path, n, m, O)
+    #test_bfs(xI, xG, path, n, m, O)
+    test_djk_stay_west_cost(xI, xG, path, n, m, O)
+
     plt.show()
