@@ -7,7 +7,6 @@
 # Please do not distribute or publish solutions to this
 # exercise. You are free to use these problems for educational purposes.
 
-from cmath import sqrt
 import sys
 sys.path.append("/Library/Python/3.8/site-packages")
 
@@ -26,6 +25,7 @@ from mazemods import stayEastCost
 
 from collections import deque
 #from queue import PriorityQueue
+import math
 
 def depthFirstSearch(xI,xG,n,m,O):
   """
@@ -253,7 +253,7 @@ def manhattanHeuristic(state, goal):
   return abs(goal[0] - state[0]) + abs(goal[1] - state[1])
 
 def elucideanHeuristic(state, goal):
-  return sqrt(pow(goal[0] - state[0], 2) + pow(goal[1] - state[1], 2))
+  return math.sqrt(pow(goal[0] - state[0], 2) + pow(goal[1] - state[1], 2))
 
 def nullHeuristic(state,goal):
    """
@@ -308,10 +308,11 @@ def aStarSearch(xI,xG,n,m,O,heuristic=nullHeuristic):
                 print (f"prev {prev[cur_x]}")
                 cur_cost = getCostOfActions(cur_x, [u[i]], O)
                 cur_heuristic = heuristic(cur_x, xG)
-                if cur_cost is not None:
-                  cur_dist = dist[cur_x] + cur_cost + cur_heuristic
-                else:
-                  raise Exception(f"Error: {cost.__name__} returns None")
+                if cur_cost is None:
+                  raise Exception(f"Error: getCosOfActions returns None")
+                if cur_heuristic is None:
+                  raise Exception(f"Error: {heuristic.__name__} returns None")
+                cur_dist = dist[cur_x] + cur_cost + cur_heuristic
                 if next_x in dist:
                   if cur_dist < dist[next_x]:
                     dist[next_x] = cur_dist
@@ -374,7 +375,25 @@ def test_bfs(xI, xG, path, n, m, O):
 
 def test_djk_stay_west_cost(xI, xG, path, n, m, O):
     actions, cost, visited_count = DijkstraSearch(xI, xG, n, m, O)
-    print("djk test done")
+    print("djk stay west test done")
+    path = getPathFromActions(xI, actions)
+    showPath(xI,xG,path,n,m,O)
+
+def test_djk_stay_east_cost(xI, xG, path, n, m, O):
+    actions, cost, visited_count = DijkstraSearch(xI, xG, n, m, O, cost=stayEastCost)
+    print("djk stay east test done")
+    path = getPathFromActions(xI, actions)
+    showPath(xI,xG,path,n,m,O)
+
+def test_astar_manhattanHeuristic(xI, xG, path, n, m, O):
+    actions, cost, visited_count = aStarSearch(xI, xG, n, m, O, heuristic=manhattanHeuristic)
+    print("astar manhattanHeuristic test done")
+    path = getPathFromActions(xI, actions)
+    showPath(xI,xG,path,n,m,O)
+
+def test_astar_elucideanHeuristic(xI, xG, path, n, m, O):
+    actions, cost, visited_count = aStarSearch(xI, xG, n, m, O, heuristic=elucideanHeuristic)
+    print("astar elucideanHeuristic test done")
     path = getPathFromActions(xI, actions)
     showPath(xI,xG,path,n,m,O)
 
@@ -410,6 +429,8 @@ if __name__ == '__main__':
 
     #test_dfs(xI, xG, path, n, m, O)
     #test_bfs(xI, xG, path, n, m, O)
-    test_djk_stay_west_cost(xI, xG, path, n, m, O)
-
+    #test_djk_stay_west_cost(xI, xG, path, n, m, O)
+    #test_djk_stay_east_cost(xI, xG, path, n, m, O)
+    #test_astar_manhattanHeuristic(xI, xG, path, n, m, O)
+    test_astar_elucideanHeuristic(xI, xG, path, n, m, O)
     plt.show()
