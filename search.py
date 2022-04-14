@@ -255,7 +255,7 @@ def DijkstraSearch(xI,xG,n,m,O,cost):
 def manhattanHeuristic(state, goal):
   return abs(goal[0] - state[0]) + abs(goal[1] - state[1])
 
-def elucideanHeuristic(state, goal):
+def euclideanHeuristic(state, goal):
   return math.sqrt(pow(goal[0] - state[0], 2) + pow(goal[1] - state[1], 2))
 
 def nullHeuristic(state,goal):
@@ -278,10 +278,10 @@ def aStarSearch(xI,xG,n,m,O,heuristic):
   def aStar(xI, xG, n, m, O, heuristic):
     if heuristic == "manhattan":
       heuristic = manhattanHeuristic
-    elif heuristic == "elucidean":
-      heuristic = elucideanHeuristic
+    elif heuristic == "euclidean":
+      heuristic = euclideanHeuristic
     else:
-      raise Exception(f"Error: expect manhattan or elucidean, got {heuristic}")
+      raise Exception(f"Error: expect manhattan or euclidean, got {heuristic}")
 
     dist = dict()
     prev = dict()
@@ -410,9 +410,9 @@ def test_astar_manhattanHeuristic(xI, xG, path, n, m, O):
     path = getPathFromActions(xI, actions)
     showPath(xI,xG,path,n,m,O)
 
-def test_astar_elucideanHeuristic(xI, xG, path, n, m, O):
-    actions, cost, visited_count = aStarSearch(xI, xG, n, m, O, "elucidean")
-    print("astar elucideanHeuristic test done")
+def test_astar_euclideanHeuristic(xI, xG, path, n, m, O):
+    actions, cost, visited_count = aStarSearch(xI, xG, n, m, O, "euclidean")
+    print("astar euclideanHeuristic test done")
     print(f"cost {cost}")
     print(f"number of node visited: {visited_count}")
     path = getPathFromActions(xI, actions)
@@ -453,5 +453,5 @@ if __name__ == '__main__':
     test_djk_stay_west_cost(xI, xG, path, n, m, O)
     test_djk_stay_east_cost(xI, xG, path, n, m, O)
     test_astar_manhattanHeuristic(xI, xG, path, n, m, O)
-    test_astar_elucideanHeuristic(xI, xG, path, n, m, O)
+    test_astar_euclideanHeuristic(xI, xG, path, n, m, O)
     plt.show()
