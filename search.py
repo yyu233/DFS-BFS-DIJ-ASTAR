@@ -7,8 +7,8 @@
 # Please do not distribute or publish solutions to this
 # exercise. You are free to use these problems for educational purposes.
 
-import sys
-sys.path.append("/Library/Python/3.8/site-packages")
+#import sys
+#sys.path.append("/Library/Python/3.8/site-packages")
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -149,7 +149,7 @@ def breadthFirstSearch(xI,xG,n,m,O):
 
 
 
-def DijkstraSearch(xI,xG,n,m,O,cost=stayWestCost):
+def DijkstraSearch(xI,xG,n,m,O,cost):
   """
     Search the nodes with least cost first. 
     
@@ -162,10 +162,13 @@ def DijkstraSearch(xI,xG,n,m,O,cost=stayWestCost):
     nodes in your search. 
     """
   "*** YOUR CODE HERE ***"
-  def djk(xI, xG, n, m, O, cost=stayWestCost):
-
-    if cost.__name__ != "stayWestCost" and  cost.__name__ != "stayEastCost":
-      raise Exception(f"Error: cost function {cost.__name__} is not defined")
+  def djk(xI, xG, n, m, O, cost):
+    if cost == "westcost":
+      cost = stayWestCost
+    elif cost == "eastcost":
+      cost = stayEastCost
+    else:
+      raise Exception(f"Error: expect westcost or eastcost, got {cost}")
 
     dist = dict()
     prev = dict()
@@ -262,7 +265,7 @@ def nullHeuristic(state,goal):
    """
    return 0
 
-def aStarSearch(xI,xG,n,m,O,heuristic=nullHeuristic):
+def aStarSearch(xI,xG,n,m,O,heuristic):
   "Search the node that has the lowest combined cost and heuristic first."
   """The function uses a function heuristic as an argument. We have used
     the null heuristic here first, you should redefine heuristics as part of
@@ -272,7 +275,13 @@ def aStarSearch(xI,xG,n,m,O,heuristic=nullHeuristic):
     Finally, the algorithm should return the number of visited
     nodes during the search."""
   "*** YOUR CODE HERE ***"
-  def aStar(xI, xG, n, m, O, heuristic=nullHeuristic):
+  def aStar(xI, xG, n, m, O, heuristic):
+    if heuristic == "manhattan":
+      heuristic = manhattanHeuristic
+    elif heuristic == "elucidean":
+      heuristic = elucideanHeuristic
+    else:
+      raise Exception(f"Error: expect manhattan or elucidean, got {heuristic}")
 
     dist = dict()
     prev = dict()
@@ -364,36 +373,48 @@ def showPath(xI,xG,path,n,m,O):
 def test_dfs(xI, xG, path, n, m, O):
     actions, cost, visited_count = depthFirstSearch(xI, xG, n, m, O)
     print("dfs test done")
+    print(f"cost {cost}")
+    print(f"number of node visited: {visited_count}")
     path = getPathFromActions(xI,actions)
     showPath(xI,xG,path,n,m,O)
 
 def test_bfs(xI, xG, path, n, m, O):
     actions, cost, visited_count = breadthFirstSearch(xI, xG, n, m, O)
     print("bfs test done")
+    print(f"cost {cost}")
+    print(f"number of node visited: {visited_count}")
     path = getPathFromActions(xI,actions)
     showPath(xI,xG,path,n,m,O)
 
 def test_djk_stay_west_cost(xI, xG, path, n, m, O):
-    actions, cost, visited_count = DijkstraSearch(xI, xG, n, m, O)
+    actions, cost, visited_count = DijkstraSearch(xI, xG, n, m, O, "westcost")
     print("djk stay west test done")
+    print(f"cost {cost}")
+    print(f"number of node visited: {visited_count}")
     path = getPathFromActions(xI, actions)
     showPath(xI,xG,path,n,m,O)
 
 def test_djk_stay_east_cost(xI, xG, path, n, m, O):
-    actions, cost, visited_count = DijkstraSearch(xI, xG, n, m, O, cost=stayEastCost)
+    actions, cost, visited_count = DijkstraSearch(xI, xG, n, m, O, "eastcost")
     print("djk stay east test done")
+    print(f"cost {cost}")
+    print(f"number of node visited: {visited_count}")
     path = getPathFromActions(xI, actions)
     showPath(xI,xG,path,n,m,O)
 
 def test_astar_manhattanHeuristic(xI, xG, path, n, m, O):
-    actions, cost, visited_count = aStarSearch(xI, xG, n, m, O, heuristic=manhattanHeuristic)
+    actions, cost, visited_count = aStarSearch(xI, xG, n, m, O, "manhattan")
     print("astar manhattanHeuristic test done")
+    print(f"cost {cost}")
+    print(f"number of node visited: {visited_count}")
     path = getPathFromActions(xI, actions)
     showPath(xI,xG,path,n,m,O)
 
 def test_astar_elucideanHeuristic(xI, xG, path, n, m, O):
-    actions, cost, visited_count = aStarSearch(xI, xG, n, m, O, heuristic=elucideanHeuristic)
+    actions, cost, visited_count = aStarSearch(xI, xG, n, m, O, "elucidean")
     print("astar elucideanHeuristic test done")
+    print(f"cost {cost}")
+    print(f"number of node visited: {visited_count}")
     path = getPathFromActions(xI, actions)
     showPath(xI,xG,path,n,m,O)
 
@@ -427,10 +448,10 @@ if __name__ == '__main__':
     
     #plt.show()
 
-    #test_dfs(xI, xG, path, n, m, O)
-    #test_bfs(xI, xG, path, n, m, O)
-    #test_djk_stay_west_cost(xI, xG, path, n, m, O)
-    #test_djk_stay_east_cost(xI, xG, path, n, m, O)
-    #test_astar_manhattanHeuristic(xI, xG, path, n, m, O)
+    test_dfs(xI, xG, path, n, m, O)
+    test_bfs(xI, xG, path, n, m, O)
+    test_djk_stay_west_cost(xI, xG, path, n, m, O)
+    test_djk_stay_east_cost(xI, xG, path, n, m, O)
+    test_astar_manhattanHeuristic(xI, xG, path, n, m, O)
     test_astar_elucideanHeuristic(xI, xG, path, n, m, O)
     plt.show()
