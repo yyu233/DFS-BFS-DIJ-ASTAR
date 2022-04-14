@@ -7,6 +7,7 @@
 # Please do not distribute or publish solutions to this
 # exercise. You are free to use these problems for educational purposes.
 
+from cmath import sqrt
 import sys
 sys.path.append("/Library/Python/3.8/site-packages")
 
@@ -248,8 +249,11 @@ def DijkstraSearch(xI,xG,n,m,O,cost=stayWestCost):
 
 
 
+def manhattanHeuristic(state, goal):
+  return abs(goal[0] - state[0]) + abs(goal[1] - state[1])
 
-
+def elucideanHeuristic(state, goal):
+  return sqrt(pow(goal[0] - state[0], 2) + pow(goal[1] - state[1], 2))
 
 def nullHeuristic(state,goal):
    """
@@ -258,17 +262,95 @@ def nullHeuristic(state,goal):
    """
    return 0
 
-#def aStarSearch(xI,xG,n,m,O,heuristic=nullHeuristic):
-"Search the node that has the lowest combined cost and heuristic first."
-"""The function uses a function heuristic as an argument. We have used
-  the null heuristic here first, you should redefine heuristics as part of 
-  the homework. 
-  Your algorithm also needs to return the total cost of the path using
-  getCostofActions functions. 
-  Finally, the algorithm should return the number of visited
-  nodes during the search."""
-"*** YOUR CODE HERE ***"
-  
+def aStarSearch(xI,xG,n,m,O,heuristic=nullHeuristic):
+  "Search the node that has the lowest combined cost and heuristic first."
+  """The function uses a function heuristic as an argument. We have used
+    the null heuristic here first, you should redefine heuristics as part of
+    the homework.
+    Your algorithm also needs to return the total cost of the path using
+    getCostofActions functions.
+    Finally, the algorithm should return the number of visited
+    nodes during the search."""
+  "*** YOUR CODE HERE ***"
+  def aStar(xI, xG, n, m, O, heuristic=nullHeuristic):
+
+    dist = dict()
+    prev = dict()
+    dist[xI] = 0
+    prev[xI] = None
+
+    #q = PriorityQueue()
+    q = []
+    q.append((0, xI))
+
+    visited_set = set()
+    visited_set.add(xI)
+
+    q_set = set()
+    q_set.add(xI)
+    count = 0
+
+    while len(q) != 0:
+      print("q")
+      count = count + 1
+      cur_tup = q.pop()
+      cur_x = cur_tup[1]
+      q_set.remove(cur_x)
+      print(cur_tup)
+      u = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+      for i in range(len(u)):
+        print("direction loop")
+        next_x  = tuple(map(lambda a, b: a + b, cur_x, u[i]))
+        if next_x != prev[cur_x]:
+          if not collisionCheck(cur_x,u[i],O):
+            if next_x[0] >= 0 and next_x[0] < n:
+              if next_x[1] >= 0 and next_x[1] < m:
+                print (f"prev {prev[cur_x]}")
+                cur_cost = getCostOfActions(cur_x, [u[i]], O)
+                cur_heuristic = heuristic(cur_x, xG)
+                if cur_cost is not None:
+                  cur_dist = dist[cur_x] + cur_cost + cur_heuristic
+                else:
+                  raise Exception(f"Error: {cost.__name__} returns None")
+                if next_x in dist:
+                  if cur_dist < dist[next_x]:
+                    dist[next_x] = cur_dist
+                    prev[next_x] = cur_x
+                else:
+                    dist[next_x] = cur_dist
+                    prev[next_x] = cur_x
+                print(f"next: {next_x}")
+                if next_x in q_set:
+                  for i in range(len(q)):
+                    if q[i][1] == next_x:
+                      q[i] = (cur_dist, next_x)
+                      break
+                else:
+                  if next_x not in visited_set:
+                    visited_set.add(next_x)
+                    q_set.add(next_x)
+                    q.append((cur_dist, next_x))
+                q.sort(key=lambda x:x[0], reverse=True)
+                print(q)
+      print(f"direction loop done")
+    return dist, prev, count
+
+  res_actions = []
+  dist, prev, num_visited = aStar(xI, xG, n, m, O, heuristic)
+  print("aStar done")
+
+  if prev is not None:
+    itr = xG
+    while itr != xI:
+      print(itr)
+      action = tuple(map(lambda cur_x, prev_x: cur_x - prev_x, itr, prev[itr]))
+      res_actions.append(action)
+      itr = prev[itr]
+    res_actions.reverse()
+  else:
+    raise Exception("Error: aStar returns None for prev")
+
+  return res_actions, dist[xG], num_visited
 
     
 # Plots the path
