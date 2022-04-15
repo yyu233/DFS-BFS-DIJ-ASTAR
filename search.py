@@ -41,12 +41,15 @@ def depthFirstSearch(xI,xG,n,m,O):
   
     """
   "*** YOUR CODE HERE ***"
+  print("dfs begin")
+  print(f"xI {xI} xG {xG}")
   def dfs(xI, xG, n, m, O, visited_set, tmp_action_list):
     #print (xI)
     #print (xG)
     res = []
+    print(f"xI {xI}")
     if xI == xG:
-      return [a for a in tmp_action_list]
+      return [a for a in tmp_action_list], True
     u = [(-1, 0), (0, 1), (1, 0), (0, -1)]
     for i in range(len(u)):
       if not collisionCheck(xI,u[i],O):
@@ -55,17 +58,22 @@ def depthFirstSearch(xI,xG,n,m,O):
           if next_x[1] >= 0 and next_x[1] < m:
             if next_x not in visited_set:
               tmp_action_list.append(u[i])
+              print(f"cur_x {xI}")
+              print(f"next {next_x}")
               visited_set.add(xI)
-              res = dfs(next_x, xG, n, m, O, visited_set, tmp_action_list)
+              res, status = dfs(next_x, xG, n, m, O, visited_set, tmp_action_list)
+              if status == True:
+                return res, status
               tmp_action_list.pop()
-    return res
+    return res, False
     
   tmp_actions = []
   visited = set()
-  res_actions = dfs(xI, xG, n, m, O, visited, tmp_actions)
+  res_actions = []
+  res_actions, status = dfs(xI, xG, n, m, O, visited, tmp_actions)
   #path = getPathFromActions(xI, res_actions)
   cost = getCostOfActions(xI, res_actions, O)
-
+  print("dfs done")
   return res_actions, cost, len(visited)
 
 
@@ -88,6 +96,8 @@ def breadthFirstSearch(xI,xG,n,m,O):
 
     """
   "*** YOUR CODE HERE ***"
+  print("bfs begin")
+  print(f"xI {xI} xG {xG}")
   class Node:
     def __init__(self, cur_x=None, prev_to_cur_action=None, prev=None):
       self.x = cur_x
@@ -140,7 +150,7 @@ def breadthFirstSearch(xI,xG,n,m,O):
 
   res_actions, visited = bfs(xI, xG, n, m, O)
   cost = getCostOfActions(xI, res_actions, O)
-
+  print("bfs done")
   return res_actions, cost, len(visited)
 
 
@@ -162,6 +172,9 @@ def DijkstraSearch(xI,xG,n,m,O,cost):
     nodes in your search. 
     """
   "*** YOUR CODE HERE ***"
+  print("djk begin")
+  print(f"xI {xI} xG {xG}")
+
   def djk(xI, xG, n, m, O, cost):
     if cost == "westcost":
       cost = stayWestCost
@@ -244,7 +257,8 @@ def DijkstraSearch(xI,xG,n,m,O,cost):
     res_actions.reverse()
   else:
     raise Exception("Error: djk returns None for prev")
-
+  
+  print("djk done")
   return res_actions, dist[xG], num_visited
   
 
@@ -275,6 +289,8 @@ def aStarSearch(xI,xG,n,m,O,heuristic):
     Finally, the algorithm should return the number of visited
     nodes during the search."""
   "*** YOUR CODE HERE ***"
+  print("astar begin")
+  print(f"xI {xI} xG {xG}")
   def aStar(xI, xG, n, m, O, heuristic):
     if heuristic == "manhattan":
       heuristic = manhattanHeuristic
@@ -360,6 +376,7 @@ def aStarSearch(xI,xG,n,m,O,heuristic):
   else:
     raise Exception("Error: aStar returns None for prev")
 
+  print("astar done")
   return res_actions, dist[xG], num_visited
 
     
@@ -432,8 +449,8 @@ if __name__ == '__main__':
     print('Collision!' if collided else 'No collision!')
     
     # Sample path plotted to goal
-    xI = (1,1)
-    xG = (20,1)
+    xI = (1,3)
+    xG = (1,8)
     actions = [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),
                (1,0),(1,0),(1,0),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
     path = getPathFromActions(xI,actions)
@@ -449,9 +466,9 @@ if __name__ == '__main__':
     #plt.show()
 
     test_dfs(xI, xG, path, n, m, O)
-    test_bfs(xI, xG, path, n, m, O)
-    test_djk_stay_west_cost(xI, xG, path, n, m, O)
-    test_djk_stay_east_cost(xI, xG, path, n, m, O)
-    test_astar_manhattanHeuristic(xI, xG, path, n, m, O)
-    test_astar_euclideanHeuristic(xI, xG, path, n, m, O)
+    #test_bfs(xI, xG, path, n, m, O)
+    #test_djk_stay_west_cost(xI, xG, path, n, m, O)
+    #test_djk_stay_east_cost(xI, xG, path, n, m, O)
+    #test_astar_manhattanHeuristic(xI, xG, path, n, m, O)
+    #test_astar_euclideanHeuristic(xI, xG, path, n, m, O)
     plt.show()
